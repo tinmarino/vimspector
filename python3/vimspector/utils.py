@@ -19,7 +19,6 @@ import os
 import contextlib
 import vim
 import json
-import string
 
 _log_handler = logging.FileHandler( os.path.expanduser( '~/.vimspector.log' ),
                                     mode = 'w' )
@@ -191,8 +190,8 @@ def TemporaryVimOption( opt, value ):
     vim.options[ opt ] = old_value
 
 
-def PathToConfigFile( file_name ):
-  p = os.getcwd()
+def PathToConfigFile( file_name, directory = None ):
+  p = os.getcwd() if directory is None else directory
   while True:
     candidate = os.path.join( p, file_name )
     if os.path.exists( candidate ):
@@ -239,11 +238,14 @@ def SelectFromList( prompt, options ):
       return None
 
 
-def AskForInput( prompt ):
+def AskForInput( prompt, default='', completion='file' ):
   # TODO: Handle the ctrl-c and such responses returning empty or something
   with InputSave():
     try:
-      return vim.eval( "input( '{0}' )".format( Escape( prompt ) ) )
+      return vim.eval( "input( '{}', '{}', '{}' )".format(
+        Escape( prompt ),
+        Escape( default ),
+        Escape( completion ) ) )
     except KeyboardInterrupt:
       return ''
 
@@ -274,89 +276,12 @@ def AppendToBuffer( buf, line_or_lines, modified=False ):
   return line
 
 
-
 def ClearBuffer( buf ):
   buf[ : ] = None
 
 
 def IsCurrent( window, buf ):
   return vim.current.window == window and vim.current.window.buffer == buf
-
-
-# TODO: Should we just run the substitution on the whole JSON string instead?
-# That woul dallow expansion in bool and number values, such as ports etc. ?
-def ExpandReferencesInDict( obj, mapping, **kwargs ):
-  def expand_refs_in_string( s ):
-    s = os.path.expanduser( s )
-    s = os.path.expandvars( s )
-
-    # Parse any variables passed in in mapping, and ask for any that weren't,
-    # storing the result in mapping
-    bug_catcher = 0
-    while bug_catcher < 100:
-      ++bug_catcher
-
-      try:
-        s = string.Template( s ).substitute( mapping, **kwargs )
-        break
-      except KeyError as e:
-        # HACK: This is seemingly the only way to get the key. str( e ) returns
-        # the key surrounded by '' for unknowable reasons.
-        key = e.args[ 0 ]
-        mapping[ key ] = AskForInput( 'Enter value for {}: '.format( key ) )
-      except ValueError as e:
-        UserMessage( 'Invalid $ in string {}: {}'.format( s, e ),
-                     persist = True )
-        break
-
-    return s
-
-  def expand_refs_in_object( obj ):
-    if isinstance( obj, dict ):
-      ExpandReferencesInDict( obj, mapping, **kwargs )
-    elif isinstance( obj, list ):
-      for i, _ in enumerate( obj ):
-        # FIXME: We are assuming that it is a list of string, but could be a
-        # list of list of a list of dict, etc.
-        obj[ i ] = expand_refs_in_object( obj[ i ] )
-    elif isinstance( obj, str ):
-      obj = expand_refs_in_string( obj )
-
-    return obj
-
-  for k in obj.keys():
-    obj[ k ] = expand_refs_in_object( obj[ k ] )
-
-
-def ParseVariables( variables ):
-  new_variables = {}
-  for n, v in variables.items():
-    if isinstance( v, dict ):
-      if 'shell' in v:
-        import subprocess
-        import shlex
-
-        new_v = v.copy()
-        # Bit of a hack. Allows environment variables to be used.
-        ExpandReferencesInDict( new_v, {} )
-
-        env = os.environ.copy()
-        env.update( new_v.get( 'env' ) or {} )
-        cmd = new_v[ 'shell' ]
-        if not isinstance( cmd, list ):
-          cmd = shlex.split( cmd )
-
-        new_variables[ n ] = subprocess.check_output(
-          cmd,
-          cwd = new_v.get( 'cwd' ) or os.getcwd(),
-          env = env ).decode( 'utf-8' ).strip()
-      else:
-        raise ValueError(
-          "Unsupported variable defn {}: Missing 'shell'".format( n ) )
-    else:
-      new_variables[ n ] = v
-
-  return new_variables
 
 
 def DisplayBaloon( is_term, display ):

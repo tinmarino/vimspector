@@ -22,6 +22,7 @@ import shlex
 
 from vimspector import ( breakpoints,
                          code,
+                         config,
                          debug_adapter_connection,
                          install,
                          output,
@@ -66,26 +67,10 @@ class DebugSession( object ):
     self._configuration = None
     self._adapter = None
 
-    launch_config_file = utils.PathToConfigFile( '.vimspector.json' )
-
-    if not launch_config_file:
-      utils.UserMessage( 'Unable to find .vimspector.json. You need to tell '
-                         'vimspector how to launch your application' )
-      return
-
-    with open( launch_config_file, 'r' ) as f:
-      database = json.load( f )
+    database, workspace_root = config.GetConfigurationDatabase()
+    adapters = config.GetAdapters( database )
 
     configurations = database.get( 'configurations' )
-    adapters = {}
-
-    for gadget_config_file in [ install.GetGadgetConfigFile( VIMSPECTOR_HOME ),
-                                utils.PathToConfigFile( '.gadgets.json' ) ]:
-      if gadget_config_file and os.path.exists( gadget_config_file ):
-        with open( gadget_config_file, 'r' ) as f:
-          adapters.update( json.load( f ).get( 'adapters' ) or {} )
-
-    adapters.update( database.get( 'adapters' ) or {} )
 
     if len( configurations ) == 1:
       configuration_name = next( iter( configurations.keys() ) )
@@ -97,7 +82,7 @@ class DebugSession( object ):
     if not configuration_name or configuration_name not in configurations:
       return
 
-    self._workspace_root = os.path.dirname( launch_config_file )
+    self._workspace_root = workspace_root
 
     configuration = configurations[ configuration_name ]
     adapter = configuration.get( 'adapter' )
@@ -113,13 +98,13 @@ class DebugSession( object ):
       'gadgetDir': install.GetGadgetDir( VIMSPECTOR_HOME, install.GetOS() )
     }
     self._variables.update(
-      utils.ParseVariables( adapter.get( 'variables', {} ) ) )
+      config.ParseVariables( adapter.get( 'variables', {} ) ) )
     self._variables.update(
-      utils.ParseVariables( configuration.get( 'variables', {} ) ) )
+      config.ParseVariables( configuration.get( 'variables', {} ) ) )
     self._variables.update( launch_variables )
 
-    utils.ExpandReferencesInDict( configuration, self._variables )
-    utils.ExpandReferencesInDict( adapter, self._variables )
+    config.ExpandReferencesInDict( configuration, self._variables )
+    config.ExpandReferencesInDict( adapter, self._variables )
 
     if not adapter:
       utils.UserMessage( 'No adapter configured for {}'.format(
