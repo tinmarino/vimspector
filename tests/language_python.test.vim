@@ -31,12 +31,13 @@ function! Test_Go_Simple()
   pyx << EOF
 from unittest.mock import patch
 with patch( 'vimspector.utils.SelectFromList',
-            return_value=None ) as p:
+            return_value=None ) as select_from_list:
   with patch( 'vimspector.utils.AskForInput',
-              return_value=None ) as p:
+              return_value=None ) as ask_for_input:
     vim.eval( 'feedkeys( "\<F5>", "xt" )' )
     vim.eval( 'vimspector#test#signs#AssertCursorIsAtLineInBuffer( fn, 6, 1 )' )
-    p.assert_called()
+    ask_for_input.assert_called()
+  select_from_list.assert_called()
 EOF
 
   " Step
