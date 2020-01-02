@@ -29,7 +29,4 @@ def Settings( **kwargs ):
       }
     }
 
-  if IgnoreExtraConf:
-    raise IgnoreExtraConf()
-
   return None
