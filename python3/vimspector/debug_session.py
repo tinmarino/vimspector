@@ -467,19 +467,19 @@ class DebugSession( object ):
     if 'cwd' not in self._adapter:
       self._adapter[ 'cwd' ] = os.getcwd()
 
-    channel_send_func = vim.bindeval(
-      "vimspector#internal#{}#StartDebugSession( {} )".format(
-        self._connection_type,
-        json.dumps( self._adapter ) ) )
+    if not vim.eval( "vimspector#internal#{}#StartDebugSession( {} )".format(
+      self._connection_type,
+      json.dumps( self._adapter ) ) ):
 
-    if channel_send_func is None:
       self._logger.error( "Unable to start debug server" )
     else:
       self._connection = debug_adapter_connection.DebugAdapterConnection(
         self,
-        channel_send_func )
+        lambda msg: utils.Call(
+          "vimspector#internal#{}#Send".format( self._connection_type ),
+          msg ) )
 
-      self._logger.info( 'Debug Adapter Started' )
+    self._logger.info( 'Debug Adapter Started' )
 
   def _StopDebugAdapter( self, callback = None ):
     def handler( *args ):
