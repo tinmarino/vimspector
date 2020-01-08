@@ -482,6 +482,7 @@ class DebugSession( object ):
       self._logger.info( 'Debug Adapter Started' )
 
   def _StopDebugAdapter( self, callback = None ):
+    if not self._connection: return
     def handler( *args ):
       if callback:
         self._logger.debug( "Setting server exit handler before disconnect" )
