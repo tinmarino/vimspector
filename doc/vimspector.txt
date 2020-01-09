@@ -234,19 +234,17 @@ Language dependencies ~
 
 The debug adapters themselves have certain runtime dependencies:
 
-| Language | Status | Switch | Adapter | Dependencies | |------------------|---
------------|------------------------------|-------------------|----------------
---------| | C, C++, etc. | Supported | '--all' or '--enable-c' | vscode-
-cpptools | mono-core | | Python | Supported | '--all' or '--enable-python' |
-vscode-python | Python 2.7 or Python 3 | | TCL | Experimental | '--all' or
-'--enable-tcl' | tclpro | TCL 8.5 | | Bourne Shell | Experimental | '--all' or
-'--enable-bash' | vscode-bash-debug | Bash v?? | | C# (dotnet core) |
-Experimental | '--force-enable-csharp' | netcoredbg | DotNet core | | C# (mono)
-| Experimental | '--force-enable-csharp' | vscode-mono-debug | Mono | | Go |
-Experimental | '--enable-go' | vscode-go | Go, Delve [6] | | Node.js |
-Experimental | '--force-enable-node' | vscode-node-debug2 | 6 < Node < 12, Npm
-| | Javascript | Experimental | '--force-enable-chrome' | debugger-for-chrome |
-Chrome |
+| Language         | Status       | Switch                       | Adapter             | Dependencies |
+|------------------|--------------|------------------------------|---------------------|---|
+| C, C++, etc.     | Supported    | '--all' or '--enable-c'      | vscode-cpptools     | mono-core |
+| Python           | Supported    | '--all' or '--enable-python' | vscode-python       | Python 2.7 or Python 3 |
+| TCL              | Experimental | '--all' or '--enable-tcl'    | tclpro              | TCL 8.5 |
+| Bourne Shell     | Experimental | '--all' or '--enable-bash'   | vscode-bash-debug   | Bash v?? |
+| C# (dotnet core) | Experimental | '--force-enable-csharp'      | netcoredbg          | DotNet core |
+| C# (mono)        | Experimental | '--force-enable-csharp'      | vscode-mono-debug   | Mono |
+| Go               | Experimental | '--enable-go'                | vscode-go           | Go, Delve [6] |
+| Node.js          | Experimental | '--force-enable-node'        | vscode-node-debug2  | 6 < Node < 12, Npm |
+| Javascript       | Experimental | '--force-enable-chrome'      | debugger-for-chrome | Chrome |
 
 For other languages, you'll need some other way to install the gadget.
 
@@ -483,16 +481,34 @@ loading vimspector**:
 >
   let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
 <
-| Key | Function | API | | --- | --- | --- | | 'F5' | When debugging, continue.
-Otherwise start debugging. | 'vimspector#Continue()' | | 'Shift F5' | Stop
-debugging. | 'vimspector#Stop()' | | 'Ctrl Shift F5' | Restart debugging with
-the same configuration. | 'vimspector#Restart()' | | 'F6' | Pause debugee. |
-'vimspector#Pause()' | | 'F9' | Toggle line breakpoint on the current line. |
-'vimspector#ToggleBreakpoint()' | | 'Shift F9' | Add a function breakpoint for
-the expression under cursor | "vimspector#AddFunctionBreakpoint( '<cexpr>' )" |
-| 'F10' | Step Over | 'vimspector#StepOver()' | | 'F11' | Step Into |
-'vimspector#StepInto()' | | 'Shift F11' | Step out of current function scope |
-'vimspector#StepOut()' |
+| Key             | Function \n API                                     |
+| 'F5'            | When debugging, continue.Otherwise start debugging  |
+|                 |   'vimspector#Continue()'                           |
+|                 |                                                     |
+| 'Shift F5'      | Stop debugging                                      |
+|                 |   'vimspector#Stop()'                               |
+|                 |                                                     |
+| 'Ctrl Shift F5' | Restart debugging with the same configuration       |
+|                 |   'vimspector#Restart()'                            |
+|                 |                                                     |
+| 'F6'            | Pause debugee                                       |
+|                 |   'vimspector#Pause()'                              |
+|                 |                                                     |
+| 'F9'            | Toggle line breakpoint on the current line          |
+|                 |   'vimspector#ToggleBreakpoint()'                   |
+|                 |                                                     |
+| 'Shift F9'      | Add a function breakpoint                           |
+|                 |      for the expression under cursor                |
+|                 |   "vimspector#AddFunctionBreakpoint( '<cexpr>' )"   |
+|                 |                                                     |
+| 'F10'           | Step Over                                           |
+|                 |   'vimspector#StepOver()'                           |
+|                 |                                                     |
+| 'F11'           | Step Into                                           |
+|                 |   'vimspector#StepInto()'                           |
+|                 |                                                     |
+| 'Shift F11'     | Step out of current function scope                  |
+|                 |   'vimspector#StepOut()'                            |
 
 -------------------------------------------------------------------------------
                                                         *vimspector-human-mode*
@@ -507,16 +523,35 @@ variables) are unfixable, try the following mappings, by adding the following
 >
   let g:vimspector_enable_mappings = 'HUMAN'
 <
-| Key | Function | API | | --- | --- | --- | | 'F5' | When debugging, continue.
-Otherwise start debugging. | 'vimspector#Continue()' | | 'F3' | Stop debugging.
-| 'vimspector#Stop()' | | 'F4' | Restart debugging with the same configuration.
-| 'vimspector#Restart()' | | 'F6' | Pause debugee. | 'vimspector#Pause()' | |
-'F9' | Toggle line breakpoint on the current line. |
-'vimspector#ToggleBreakpoint()' | | 'F8' | Add a function breakpoint for the
-expression under cursor | "vimspector#AddFunctionBreakpoint( '<cexpr>' )" | |
-'F10' | Step Over | 'vimspector#StepOver()' | | 'F11' | Step Into |
-'vimspector#StepInto()' | | 'F12' | Step out of current function scope |
-'vimspector#StepOut()' |
+
+| Key   | Function                                                  |
+| ---   | ---                                                       |
+| 'F5'  | When debugging, continue.  Otherwise start debugging      |
+|       |   'vimspector#Continue()'                                 |
+|       |                                                           |
+| 'F3'  | Stop debugging.                                           |
+|       |   'vimspector#Stop()'                                     |
+|       |                                                           |
+| 'F4'  | Restart debugging with the same configuration             |
+|       |   'vimspector#Restart()'                                  |
+|       |                                                           |
+| 'F6'  | Pause debugee                                             |
+|       |   'vimspector#Pause()'                                    |
+|       |                                                           |
+| 'F9'  | Toggle line breakpoint on the current line                |
+|       |   'vimspector#ToggleBreakpoint()'                         |
+|       |                                                           |
+| 'F8'  | Add a function breakpoint for the expression under cursor |
+|       |   "vimspector#AddFunctionBreakpoint( '<cexpr>' )"         |
+|       |                                                           |
+| 'F10' | Step Over                                                 |
+|       |   'vimspector#StepOver()'                                 |
+|       |                                                           |
+| 'F11' | Step Into                                                 |
+|       |   'vimspector#StepInto()'                                 |
+|       |                                                           |
+| 'F12' | Step out of current function scope                        |
+|       |   'vimspector#StepOut()'                                  |
 
 ===============================================================================
                                                              *vimspector-usage*
