@@ -74,19 +74,23 @@ class DebugSession( object ):
     self._configuration = None
     self._adapter = None
 
+    # Load database from configuration file or default
     current_file = utils.GetBufferFilepath( vim.current.buffer )
 
     launch_config_file = utils.PathToConfigFile(
       '.vimspector.json',
       os.path.dirname( current_file ) )
 
-    if not launch_config_file:
+    if launch_config_file:
+      with open( launch_config_file, 'r' ) as f:
+        database = json.load( f )
+    else:
+      database = json.loads(utils.GetDefaultConfig( ))
+
+    if not database:
       utils.UserMessage( 'Unable to find .vimspector.json. You need to tell '
                          'vimspector how to launch your application.' )
       return
-
-    with open( launch_config_file, 'r' ) as f:
-      database = json.load( f )
 
     configurations = database.get( 'configurations' )
     adapters = {}
@@ -113,7 +117,7 @@ class DebugSession( object ):
     if not configuration_name or configuration_name not in configurations:
       return
 
-    self._workspace_root = os.path.dirname( launch_config_file )
+    self._workspace_root = database.get('cwd', os.getcwd())
 
     configuration = configurations[ configuration_name ]
     adapter = configuration.get( 'adapter' )

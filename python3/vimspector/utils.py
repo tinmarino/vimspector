@@ -436,3 +436,41 @@ def ToUnicode( b ):
   if isinstance( b, bytes ):
     return b.decode( 'utf-8' )
   return b
+
+
+def GetDefaultPythonConfigString( ):
+  """Config file for python"""
+  cwd = os.getcwd()
+  cwf = vim.eval('expand("%")')  # relative to cwd
+  return """{
+    "configurations": {
+      "simple_python: launch": {
+        "adapter": "vscode-python",
+        "configuration": {
+          "name": "Python: Launch current file",
+          "type": "python",
+          "request": "launch",
+          "cwd": "%s",
+          "stopOnEntry": true,
+          "console": "externalTerminal",
+          "debugOptions": [],
+          "program": "%s"
+        }
+      }
+    }
+  }
+  """ % (cwd, cwf)
+
+
+def GetDefaultConfig( ):
+  """Returns: json string of default database or "{}" if unknown"""
+  # Get filetype
+  filetype = ToUnicode(vim.current.buffer.options['filetype'])
+
+  # Declare switch: filetype -> config
+  dic_switch = {
+    'python': GetDefaultPythonConfigString,
+  }
+
+  # Return corresponding function value
+  return dic_switch.get(filetype, lambda: "{}")()
