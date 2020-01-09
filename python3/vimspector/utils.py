@@ -450,16 +450,61 @@ def GetDefaultPythonConfigString( ):
           "name": "Python: Launch current file",
           "type": "python",
           "request": "launch",
-          "cwd": "%s",
           "stopOnEntry": true,
           "console": "externalTerminal",
           "debugOptions": [],
+          "cwd": "%s",
           "program": "%s"
         }
       }
     }
   }
   """ % (cwd, cwf)
+
+
+def GetDefaultCConfigString( ):
+  """Config file for C:
+  Compile vim.c -> vim with flags (unix -> gdb, osx -> lldb)
+    GDB: -g -ggdb  -DDEBUG -O0 -fno-omit-frame-pointer
+    LLDB: -g -gdwarf4 -DDEBUG -O0 -fno-omit-frame-pointer
+  """
+  from sys import platform
+
+  cmd = 'gdb'
+  if platform == 'darwin':
+    cmd = 'lldb'
+
+  # Get current working directory
+  cwd = os.getcwd()
+
+  # Get current working file
+  cwf = vim.eval('expand("%")')
+
+  # Remove extension -> current working binary
+  cwb = os.path.splitext(cwf)[0]
+
+  return """{
+    "configurations": {
+      "simple_c - launch": {
+        "adapter": "vscode-cpptools",
+        "configuration": {
+          "name": "Cpp: Launch current file",
+          "type":    "cppdbg",
+          "request": "launch",
+          "externalConsole": true,
+          "stopAtEntry": true,
+          "MIMode": "%s",
+          "logging": {
+            "engineLogging": true
+          },
+          "stopOnEntry": true,
+          "debugOptions": [],
+          "cwd": "%s",
+          "program": "%s"
+        }
+      }
+    }
+  }""" % (cmd, cwd, cwb)
 
 
 def GetDefaultConfig( ):
@@ -470,6 +515,8 @@ def GetDefaultConfig( ):
   # Declare switch: filetype -> config
   dic_switch = {
     'python': GetDefaultPythonConfigString,
+    'c': GetDefaultCConfigString,
+    'cpp': GetDefaultCConfigString,
   }
 
   # Return corresponding function value
