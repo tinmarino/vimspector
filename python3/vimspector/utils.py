@@ -444,7 +444,7 @@ def GetDefaultPythonConfigString( ):
   cwf = vim.eval('expand("%")')  # relative to cwd
   return """{
     "configurations": {
-      "simple_python: launch": {
+      "simple_python - launch": {
         "adapter": "vscode-python",
         "configuration": {
           "name": "Python: Launch current file",
